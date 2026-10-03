@@ -1,5 +1,24 @@
 # Implementation changelog
 
+## Stage 6 - Asynchronous TCP services and shared coordination (2026-10-03)
+
+- Added multiplexed TCP channels with pending request IDs, separate readers/writers, bounded
+  queues, timeouts, disconnect cleanup, and no automatic mutation retries.
+- Added concurrent inventory servers with four execution workers and bounded work queues.
+  Middleware servers accept/read requests and enqueue responses without waiting for backends.
+- Moved customer ownership, billing, bundles, compensation, and deletion into `AsyncMiddleware`.
+  Ordered per-customer future chains preserve consistency without blocking an execution worker.
+  RMI's `Middleware` facade adapts this same service to the existing synchronous interface.
+- `Services.blocking` creates a general synchronous proxy for a client; every method uses
+  `TcpChannel.invoke` and the same protocol wrapper, with no method-specific message formats.
+- TDD: transport/core tests failed before implementations existed. The first full TCP bundle
+  run exposed blocking entropy initialization during booking-ID creation; process identity and
+  monotonic booking IDs now avoid that wait on the dispatch path.
+- Passing tests cover two TCP layers, bundles/deletion, 40 held Flights requests with independent
+  Cars progress, out-of-order replies on one channel, ordered customer updates, errors,
+  compensation recovery, timeout, and disconnect. RMI behavior/failure/concurrency regressions pass.
+- Client entry points, standalone deployment, and five-JVM TCP acceptance are the final stage.
+
 ## Stage 5 - General TCP wrapping (2026-10-03)
 
 - Saved the partner-reviewed RMI solution as annotated tag `rmi-complete` at `6c17981`.
