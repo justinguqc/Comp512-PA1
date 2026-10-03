@@ -30,6 +30,11 @@ public final class RmiIntegrationTest {
                 StarterTest.check(client.queryCustomerInfo(customer).contains("Total cost: $210"), "RMI bill");
                 StarterTest.check(client.deleteCustomer(customer) && client.queryFlight(512) == 1,
                         "RMI deletion restores inventory");
+                client.newCustomer(customer);
+                StarterTest.check(client.bundle(customer, BundleTest.flights("512"), "Montreal", true, true)
+                        && client.queryCustomerInfo(customer).contains("Total cost: $210"),
+                        "bundle arguments and receipts serialize across both RMI layers");
+                StarterTest.check(client.deleteCustomer(customer), "delete RMI bundle");
             }
         }
         System.out.println("PASS RmiIntegrationTest");

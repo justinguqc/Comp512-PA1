@@ -1,5 +1,22 @@
 # Implementation changelog
 
+## Stage 4 - Bundles and failure compensation (2026-10-03)
+
+- Added bundles with repeated-flight quantities and optional cars/rooms. Validate flight
+  numbers before mutation; publish the customer's trip only after all resources succeed.
+- Shared individual/bundle acquisition logic cancels every attempted token on sold-out
+  inventory or a remote failure, retaining failed cleanup for the next customer operation.
+- Interrupted customer deletion blocks new bookings and bill queries until deletion is
+  resumed, avoiding a misleading bill after an uncertain release.
+- TDD: success test failed against the bundle stub; sold-out-later-item test then exposed
+  leaked inventory; injected lost reserve reply exposed missing compensation; injected lost
+  release reply exposed new bookings being accepted during incomplete deletion. Each failed
+  before its corresponding correction and now passes.
+- Verified repeated flights, flights-only bundles, combined bills, invalid bundles, preservation
+  of pre-existing reservations, full bundled deletion, RMI serialization, and lost-reply retry.
+- Compensation is not a durable distributed transaction: state and idempotency records are
+  in memory, and concurrent inventory queries can observe temporary bundle acquisitions.
+
 ## Stage 3 - RMI middleware and customer lifecycle (2026-10-03)
 
 - Added shared `Middleware` implementing the unchanged client interface. It routes Flights,

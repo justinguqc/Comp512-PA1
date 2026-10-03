@@ -18,20 +18,28 @@ public class Middleware implements IResourceManager {
 
     private static final class Account {
         boolean exists;
+        boolean deleting;
         final List<Booking> bookings = new ArrayList<>();
+        final List<Booking> pendingRelease = new ArrayList<>();
     }
 
     private static final class Booking {
         final IInventoryManager manager;
         final String key;
         final String location;
+        final int quantity;
         final String id = UUID.randomUUID().toString();
         ReservationReceipt receipt;
 
         Booking(IInventoryManager manager, String key, String location) {
+            this(manager, key, location, 1);
+        }
+
+        Booking(IInventoryManager manager, String key, String location, int quantity) {
             this.manager = manager;
             this.key = key;
             this.location = location;
+            this.quantity = quantity;
         }
     }
 
@@ -60,11 +68,12 @@ public class Middleware implements IResourceManager {
         }
     }
 
-    public String queryCustomerInfo(int id) {
+    public String queryCustomerInfo(int id) throws RemoteException {
         Account account = accounts.get(id);
         if (account == null) return "";
         synchronized (account) {
             if (!account.exists) return "";
+            if (account.deleting) throw new RemoteException("Customer deletion incomplete; retry deleteCustomer");
             Customer customer = new Customer(id);
             for (Booking booking : account.bookings) {
                 for (int i = 0; i < booking.receipt.getQuantity(); i++)
@@ -75,15 +84,57 @@ public class Middleware implements IResourceManager {
     }
 
     private boolean reserve(int id, Booking booking) throws RemoteException {
+        return acquire(id, Collections.singletonList(booking));
+    }
+
+    // Stage 4: track the token before sending so a lost reply can still be cancelled.
+    private boolean acquire(int id, List<Booking> trip) throws RemoteException {
         Account account = accounts.get(id);
         if (account == null) return false;
         synchronized (account) {
             if (!account.exists) return false;
-            booking.receipt = booking.manager.reserveInventory(booking.key, 1, booking.id);
-            if (booking.receipt == null) return false;
-            account.bookings.add(booking);
+            if (account.deleting) throw new RemoteException("Customer deletion incomplete; retry deleteCustomer");
+            releasePending(account);
+            List<Booking> attempted = new ArrayList<>();
+            boolean available = true;
+            try {
+                for (Booking booking : trip) {
+                    attempted.add(booking);
+                    booking.receipt = booking.manager.reserveInventory(booking.key, booking.quantity, booking.id);
+                    if (booking.receipt == null) { available = false; break; }
+                }
+            } catch (RemoteException failure) {
+                account.pendingRelease.addAll(attempted);
+                try { releasePending(account); }
+                catch (RemoteException compensation) { failure.addSuppressed(compensation); }
+                throw new RemoteException("Reservation failed; incomplete cleanup is retained for retry", failure);
+            }
+            if (!available) {
+                account.pendingRelease.addAll(attempted);
+                releasePending(account);
+                return false;
+            }
+            account.bookings.addAll(trip);
             return true;
         }
+    }
+
+    private void releasePending(Account account) throws RemoteException {
+        RemoteException failure = null;
+        Iterator<Booking> pending = account.pendingRelease.iterator();
+        while (pending.hasNext()) {
+            Booking booking = pending.next();
+            try {
+                if (!booking.manager.releaseInventory(booking.id))
+                    throw new RemoteException("Unable to cancel reservation " + booking.id);
+                pending.remove();
+            } catch (RemoteException error) {
+                if (failure == null) failure = error;
+                else failure.addSuppressed(error);
+            }
+        }
+        if (failure != null)
+            throw new RemoteException("Incomplete reservation cleanup; retry this customer operation after backend recovery", failure);
     }
 
     public boolean reserveFlight(int id, int flight) throws RemoteException {
@@ -100,6 +151,8 @@ public class Middleware implements IResourceManager {
         if (account == null) return false;
         synchronized (account) {
             if (!account.exists) return false;
+            account.deleting = true;
+            releasePending(account);
             Iterator<Booking> bookings = account.bookings.iterator();
             while (bookings.hasNext()) {
                 Booking booking = bookings.next();
@@ -109,11 +162,23 @@ public class Middleware implements IResourceManager {
                 bookings.remove();
             }
             account.exists = false;
+            account.deleting = false;
             return true;
         }
     }
     public boolean bundle(int id, Vector<String> numbers, String location, boolean car, boolean room) throws RemoteException {
-        return false;
+        if (numbers == null || numbers.isEmpty()) return false;
+        Map<Integer, Integer> counts = new LinkedHashMap<>();
+        try {
+            for (String number : numbers) counts.merge(Integer.parseInt(number), 1, Integer::sum);
+        } catch (NumberFormatException invalid) { return false; }
+        List<Booking> trip = new ArrayList<>();
+        for (Map.Entry<Integer, Integer> flight : counts.entrySet())
+            trip.add(new Booking(flights, Flight.getKey(flight.getKey()), String.valueOf(flight.getKey()), flight.getValue()));
+        if (car) trip.add(new Booking(cars, Car.getKey(location), location));
+        if (room) trip.add(new Booking(rooms, Room.getKey(location), location));
+        // The same acquisition/compensation path handles individual bookings and bundles.
+        return acquire(id, trip);
     }
 
     // Stage 3: routing preserves every public client signature and return value.
