@@ -54,12 +54,15 @@ public class Customer extends RMItem
 	public String getBill()
 	{
 		String s = "Bill for customer " + m_ID + "\n";
-		for (String key : m_reservations.keySet())
+		// Stage 1: include the required total while retaining latest-price aggregation.
+		long total = 0;
+		for (String key : new TreeSet<String>(m_reservations.keySet()))
 		{
 			ReservedItem item = (ReservedItem) m_reservations.get(key);
 			s += + item.getCount() + " " + item.getReservableItemKey() + " $" + item.getPrice() + "\n";
+			total += (long)item.getCount() * item.getPrice();
 		}
-		return s;
+		return s + "Total cost: $" + total + "\n";
 	}
 
 	public String toString()

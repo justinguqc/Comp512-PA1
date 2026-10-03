@@ -1,5 +1,18 @@
 # Implementation changelog
 
+## Stage 1 - Starter repair and behavioral test runner (2026-10-03)
+
+- Removed the embedded U+0003 that prevented the supplied console from compiling.
+- Added deterministic bill ordering and a long-valued total; retained the starter's
+  latest-price convention for grouped reservations.
+- Reconciled bundle flags: accept 0/1, Y/N, and true/false; reject invalid flags.
+- Added an offline Java behavioral test runner for PowerShell. Tests use public boundaries
+  confirmed by the user: client service, internal inventory API, and real RMI/console.
+- TDD evidence: initial run failed compilation; after the repair the bill-total assertion
+  failed; after adding totals it passed. The documented-flags assertion then failed and
+  passed after the parser correction. `StarterTest` now passes on Java 17.
+- Middleware and inventory distribution follow in the next stages.
+
 ## Stage 0 - Inspection and planning (2026-10-03)
 
 ### Changes

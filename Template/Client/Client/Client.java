@@ -377,7 +377,7 @@ public abstract class Client
 				System.out.println("-Book Car: " + arguments.elementAt(arguments.size()-2));
 				System.out.println("-Book Room: " + arguments.elementAt(arguments.size()-1));
 
-				int customerID = toInt(arguments.elementAt(1));
+				int customerID = toInt(arguments.elementAt(1));
 				Vector<String> flightNumbers = new Vector<String>();
 				for (int i = 0; i < arguments.size() - 5; ++i)
 				{
@@ -431,6 +431,9 @@ public abstract class Client
 
 	public static boolean toBoolean(String string)// throws Exception
 	{
-		return (Boolean.valueOf(string)).booleanValue();
+		// Stage 1: support both the handout's 0/1 and the console help's Y/N flags.
+		if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase("y") || string.equals("1")) return true;
+		if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase("n") || string.equals("0")) return false;
+		throw new IllegalArgumentException("Expected a bundle flag: 0/1, Y/N, or true/false");
 	}
 }
