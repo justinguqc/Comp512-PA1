@@ -1,5 +1,20 @@
 # Implementation changelog
 
+## Stage 2 - Atomic inventory service (2026-10-03)
+
+- Added the internal `IInventoryManager` contract and serializable reservation receipts;
+  reserving inventory returns quantity and booked price without a backend customer record.
+- Added booking-ID deduplication and idempotent release. Cancellation tombstones prevent a
+  delayed reserve from consuming inventory after its release has already arrived.
+- Serialized complete backend state transitions, including additions and deletion, using
+  the service monitor. No backend lock waits for another server.
+- Rejected negative quantity additions to preserve availability invariants.
+- TDD: inventory tests initially failed because the reserve API did not exist; release/replay
+  tests then failed because release did not exist; negative-count test failed before guards.
+  All now pass, including 12 simultaneous last-seat contenders and cancellation-before-reserve.
+- Receipts and cancellation tombstones are in-memory and retained for the server lifetime.
+  This supports retries while a backend remains alive, not recovery after backend restart.
+
 ## Stage 1 - Starter repair and behavioral test runner (2026-10-03)
 
 - Removed the embedded U+0003 that prevented the supplied console from compiling.
