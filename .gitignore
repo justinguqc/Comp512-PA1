@@ -1,0 +1,14 @@
+# Java build outputs
+*.class
+*.jar
+build/
+
+# Local code index and scratch artifacts
+.codegraph/
+tmp/
+
+# Local editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
