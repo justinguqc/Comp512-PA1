@@ -1,5 +1,20 @@
 # Implementation changelog
 
+## Stage 3 - RMI middleware and customer lifecycle (2026-10-03)
+
+- Added shared `Middleware` implementing the unchanged client interface. It routes Flights,
+  Cars, and Rooms operations to independent managers and owns all customer records.
+- Serialized customer operations with stable per-customer monitors; unrelated customers and
+  inventory CRUD do not wait on a middleware-wide network lock.
+- Added collision-safe generated IDs, combined bills, and customer deletion with token-based
+  release. Confirmed releases are removed immediately so interrupted deletion can resume.
+- Added configurable inventory/middleware RMI hosts and shared export/registry lifecycle.
+  Backend endpoints accept hostname:port; binding prefixes and object ports are configurable.
+- TDD: middleware tests failed before the service existed; deletion assertions failed before
+  deletion was implemented; real RMI test failed before the endpoint adapters existed.
+  `MiddlewareTest` and `RmiIntegrationTest` now pass, including calls through both RMI layers.
+- Bundle coordination and uncertain-reservation cleanup are the next stage; TCP remains pending.
+
 ## Stage 2 - Atomic inventory service (2026-10-03)
 
 - Added the internal `IInventoryManager` contract and serializable reservation receipts;
