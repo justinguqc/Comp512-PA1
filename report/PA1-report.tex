@@ -137,8 +137,9 @@ The Make build and Bash launcher checks also passed. Suite names and commands ar
 listed in \code{docs/TESTING.md}.
 
 Yinkun ran the real local process tests and verified the final code. All local process
-tests passed. We have not yet tested on five different machines, so the five-JVM result
-only confirms the local process setup, not the required physical-machine demo.
+tests passed. We also tested TCP on five McGill machines: bundles, deletion, and failed
+bundle cleanup passed. With Flights paused, another client could still query Cars;
+the flight reservation succeeded after resuming. Five-machine RMI testing is still pending.
 
 \newpage
 \section{AI use}

@@ -1,5 +1,18 @@
 # Implementation changelog
 
+## Five-host TCP confirmation and RMI snapshot export (2026-10-03)
+
+- Recorded user-confirmed TCP testing on five named McGill hosts: startup, bundles/bills,
+  deletion/restoration, failed-bundle compensation, and independent Cars progress while
+  Flights was paused, followed by successful resumed reservation.
+- Updated the report's deployment status; five-machine RMI testing remains pending.
+- Exported the accepted `rmi-complete` tag (`6c17981`) as `releases/rmi-complete.zip`,
+  containing RMI-only sources, eight tests, scripts, and documentation. Verified its contents.
+- Added extraction/build and host-specific RMI commands. The snapshot is the accepted
+  AI-assisted solution and does not replace the non-AI preliminary submission.
+- Report compilation still encounters the known built-in compiler environment error;
+  the existing local PDF was not modified or uploaded.
+
 ## Report style revision (2026-10-03)
 
 - Shortened the English report into four planned pages and changed the prose to a direct,

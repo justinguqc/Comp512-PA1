@@ -72,3 +72,9 @@ The four planned pages cover RMI/design, TCP, tests, and AI use plus collaborati
 Detailed queue sizes, repetitive submission advice, and duplicated explanations were removed.
 Required design choices, concrete test cases, AI disclosure, and confirmed contributions remain.
 The revised source was sent to the built-in compiler; the same environment error persists.
+
+Five-machine update (October 3): TCP deployment, bundles/bills, deletion/restoration,
+failed-bundle compensation, and independent Cars progress during a paused Flights request
+were confirmed by the user. Details are in `../docs/FIVE_MACHINE_TEST.md`. The report
+now records those results; five-host RMI remains pending. Earlier status notes above
+reflect the prior state. The accepted RMI-only archive is `../releases/rmi-complete.zip`.
