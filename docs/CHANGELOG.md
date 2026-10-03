@@ -1,5 +1,14 @@
 # Implementation changelog
 
+## Report evidence confirmation (2026-10-03)
+
+- Confirmed that the AI logs are complete and belong to one Codex conversation; clarified
+  that the three exports are its main thread and associated automatic-review threads.
+- Removed all remaining report placeholders. Kept the token estimate explicitly scoped
+  to the exported implementation snapshot, excluding later report drafting.
+- Remaining work is submission of the alternative preliminary RMI code, PDF compilation/
+  layout verification, and physical five-machine demo validation rather than missing prose.
+
 ## Report team details (2026-10-03)
 
 - Filled Group 30 and member names Zuojun Gu and Yinkun Zhou; omitted student IDs as requested.

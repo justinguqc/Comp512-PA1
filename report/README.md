@@ -40,15 +40,20 @@ and 85,591 output. The scope includes the main coding thread and two automatic-r
 threads, through 2026-10-03 08:12:58 UTC. It excludes later report drafting and other
 unprovided sessions. These are processed tokens, not unique text or cost estimates.
 
-Replace every `\pending{...}` with confirmed information before submitting:
+No factual placeholders remain in the LaTeX body. The team confirms the AI logs are
+complete and only one Codex conversation was used; the three exports contain its main
+thread and associated automatic-review records. The token estimate remains the recorded
+implementation snapshot and does not include later report drafting.
 
-- Identify the alternative preliminary RMI submission file.
-- Completeness of AI exports and whether there were additional AI sessions.
-- Refresh deployment evidence only if five-host testing is later performed; currently it has not been attempted.
+Remaining submission/verification work:
 
-After filling the unknowns, compile and confirm 3–5 pages, with the tests fitting on one
-page and collaboration remaining the final section. Attach AI logs separately from the
-report body. Refresh the usage estimate if more exported sessions are included.
+- Include Yinkun's preliminary non-AI RMI version as the required alternative code attachment.
+  Its submission location/file is not yet recorded here; this is not a missing report field.
+- Compile the LaTeX and confirm 3–5 pages, with one dedicated test page and collaboration last.
+  The built-in compiler environment error remains unresolved.
+- Attach `AI-conversations.json` and the completed code alongside the final report.
+- Conduct the required five-machine demo experiment and choose the actual hostnames/demo slot.
+  The report accurately states that five-machine testing has not yet been performed.
 
 Team information confirmed by Zuojun: Group 30, Zuojun Gu and Yinkun Zhou. Student IDs
 are intentionally omitted at the user's request. Zuojun developed the AI-assisted version

@@ -8,10 +8,9 @@
 \hypersetup{colorlinks=true,urlcolor=blue,linkcolor=black}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt}
-\newcommand{\pending}[1]{\textcolor{red!65!black}{\textbf{[To be confirmed: #1]}}}
 \newcommand{\code}[1]{\texttt{#1}}
 % Report draft: technical claims are grounded in commit 637aebb and the test records.
-% Replace every \pending field with verified team information before submission.
+% Team details and AI-log completeness have been confirmed by Zuojun Gu.
 % Exactly five planned pages; page 4 is dedicated to tests. AI logs are separate attachments.
 \begin{document}
 \begin{center}
@@ -251,8 +250,8 @@ already included in output and are not added again. The estimate sums per-respon
 \code{usage} records, deduplicated by response ID, rather than cumulative counters.
 It covers the main coding thread and two automatic-review threads through October 3,
 2026, 08:12:58 UTC. Repeated context processing explains the large cached-input count;
-this is not a count of unique words written. Later report drafting and unprovided sessions
-are excluded. \pending{confirm whether any additional AI sessions need to be included}.
+this is not a count of unique words written. Later report drafting is outside this
+implementation-session usage snapshot. No additional AI conversations were used.
 
 \textbf{Attachments.} \code{report/AI-conversations.json} preserves all exported records
 from the three \code{sessions/*.jsonl} files in a single JSON document;
@@ -260,15 +259,10 @@ from the three \code{sessions/*.jsonl} files in a single JSON document;
 JSON exports for editor-integrated assistants and PDFs for any general/web chats.
 The instructor's \code{AI-logging-examples/} files are not this team's interaction evidence.
 Changelogs and commits do not replace the conversation exports. Logs are separate
-attachments to retain the required report length. \pending{confirm export completeness
-and attach any additional conversations, including a later report-drafting export if required}.
-
-\textbf{Submission checklist.} Replace all marked
-unknowns; attach the real AI logs and token estimate; include the completed code and
-preliminary alternative RMI version. The supplied handout sets the report deadline to
-October 5 and code submission by the demo. The live demo requires at least five distinct
-machines and all group members present. Lab hostnames and the actual assigned demo slot
-must be confirmed independently.
+attachments to retain the required report length. The team confirms that the logs are
+complete and that only this Codex conversation was used. The three source files represent
+its main coding thread and associated automatic-review threads, rather than three
+independent conversations.
 
 \section{Individual contributions and collaboration}
 % This must remain the final report section, as required by the handout.
