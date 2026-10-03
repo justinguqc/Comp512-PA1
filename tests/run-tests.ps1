@@ -1,4 +1,4 @@
-param([string[]]$Suites = @('StarterTest'))
+param([string[]]$Suites = @('StarterTest', 'InventoryTest', 'MiddlewareTest', 'BundleTest', 'RmiIntegrationTest', 'RmiFailureTest', 'RmiConcurrencyTest', 'ProcessRmiTest'))
 $ErrorActionPreference = 'Stop'
 $pa1Root = Split-Path $PSScriptRoot -Parent
 Push-Location $pa1Root

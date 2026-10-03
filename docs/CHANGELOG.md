@@ -1,5 +1,26 @@
 # Implementation changelog
 
+## RMI deployment and acceptance (2026-10-03)
+
+- Replaced the middleware launch placeholder and updated inventory/client launchers to manage
+  registry ports, unique prefixes, advertised hostnames, and exported object ports.
+- Kept the client interface and host/name CLI intact; optional client JVM properties select
+  registry port and prefix. The original console dispatcher reaches middleware without an
+  architectural client rewrite.
+- Updated Make targets for the new interfaces/classes, added a Bash test runner, and enforced
+  LF endings for shell scripts. Added `RUNNING.md` and `TESTING.md`; updated the plan and README.
+- Added real-RMI concurrency checks for independent-customer progress, same-customer updates,
+  and concurrent generated IDs. Extended failure checks for retained compensation recovery.
+- TDD: the five-JVM console acceptance initially failed because the client ignored the custom
+  registry/prefix; it passed after the optional property configuration was added.
+- Verification: all eight suites pass on Java 17; server and client Make targets succeed;
+  Bash syntax checks and the Bash test runner smoke check pass. The five-JVM console scenario
+  also passes through the actual Bash launchers using the Make-built interface JAR/classes.
+- The first launcher-mode check exposed missing Unix utilities in the test harness's direct
+  Git Bash PATH; the harness now initializes that PATH explicitly and cleans up child processes.
+- This completes the local RMI milestone. Actual five-machine lab connectivity remains untested;
+  TCP, report, meeting records, and the teammate's independently developed version are excluded.
+
 ## Stage 4 - Bundles and failure compensation (2026-10-03)
 
 - Added bundles with repeated-flight quantities and optional cars/rooms. Validate flight

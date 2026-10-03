@@ -13,12 +13,11 @@ import java.io.*;
 public class RMIClient extends Client
 {
 	private static String s_serverHost = "localhost";
-        // recommended to hange port last digits to your group number
-	private static int s_serverPort = 1099;
+        // RMI deployment: optional properties preserve the original host/name CLI contract.
+	private static int s_serverPort = Integer.getInteger("comp512.rmi.port", 1099);
 	private static String s_serverName = "Server";
 
-	//TODO: ADD YOUR GROUP NUMBER TO COMPILE
-	private static String s_rmiPrefix = "group_xx_";
+	private static String s_rmiPrefix = System.getProperty("comp512.rmi.prefix", "group_xx_");
 
 	public static void main(String args[])
 	{	

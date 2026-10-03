@@ -1,6 +1,6 @@
 # COMP512 PA1: requirements, code map, and implementation plan
 
-Analysis date: October 3, 2026. Status: planning complete; implementation has not started.
+Analysis date: October 3, 2026. Status: RMI distribution implemented and tested; TCP remains planned.
 The starter code is preserved in baseline commit `3021762`.
 
 ## Scope and source documents
@@ -155,21 +155,21 @@ while awaiting its own response, as permitted by the assignment.
 
 ## Stages, tests, and commits
 
-These are planned stages, not completed features. Choose small vertical TDD slices within each:
+The table tracks completed RMI stages and planned TCP stages. Use small vertical TDD slices within each:
 one failing behavioral test, minimal implementation, passing test, then the next behavior.
 
 | Stage | Deliverable | Representative behavioral verification | Intended commit |
 | --- | --- | --- | --- |
 | 0 (done) | Inspect documents/code, initialize Git and CodeGraph, preserve starter | Server compiles; record full-build failure | `chore: preserve assignment handouts and untouched starter code` plus planning docs |
-| 1 | Runnable starter and test runner | Build/launch; duplicate additions; reservation rejection; bill total; generated-ID uniqueness | `fix: repair starter build and establish behavior tests` |
-| 2 | Atomic inventory reserve/release service | Two callers compete for last seat: one succeeds; release restores exactly the acquired quantity | `feat: add atomic inventory reservation operations` |
-| 3 | RMI middleware and customer lifecycle | Unchanged console reaches middleware; correct RM routing; combined bill; deletion restores all types | `feat: distribute reservations through RMI middleware` |
-| 4 | Bundle coordination | Flights-only and optional car/room; duplicate flights; sold-out later item undoes earlier acquisitions | `feat: coordinate bundles with compensation` |
+| 1 (done) | Runnable starter and test runner | Build/launch; duplicate additions; reservation rejection; bill total; generated-ID uniqueness | `fix: repair starter build and establish behavior tests` |
+| 2 (done) | Atomic inventory reserve/release service | Two callers compete for last seat: one succeeds; release restores exactly the acquired quantity | `feat: add atomic inventory reservation operations` |
+| 3 (done) | RMI middleware and customer lifecycle | Compatible console reaches middleware; correct RM routing; combined bill; deletion restores all types | `feat: distribute reservations through RMI middleware` |
+| 4 (done) | Bundle coordination | Flights-only and optional car/room; duplicate flights; sold-out later item undoes earlier acquisitions | `feat: coordinate bundles with compensation` |
 | 5 | General TCP codec and invocation | Every signature round-trips; both customer overloads; Unicode/multiline bill; malformed, split, and joined frames | `feat: add shared TCP request and response protocol` |
 | 6 | Concurrent TCP endpoints | Actual TCP on both links; slow Flights response does not delay another client's Cars query; out-of-order replies routed correctly | `feat: add concurrent TCP client middleware and managers` |
-| 7 | Multi-host deployment and demo scripts | Both modes, all commands, concurrency, disconnects, clean restart and five-host walkthrough | `chore: add deployment scripts and acceptance scenarios` |
+| 7 (RMI portion done) | Multi-host deployment and demo scripts | RMI launch scripts and local five-JVM acceptance done; TCP and actual five-host validation remain | `chore: add RMI deployment scripts and acceptance scenarios` |
 
-Test boundary proposal, to confirm before writing tests under the TDD skill:
+Test boundaries confirmed by the user before implementation under the TDD skill:
 
 - Public `IResourceManager` behavior: local service, RMI endpoint, and TCP adapter.
 - Public internal inventory reserve/release contract.
@@ -201,5 +201,21 @@ and TCP behavior aligned through shared contract scenarios.
 - No report, meeting record, contribution narrative, presentation deck, or fabricated logs.
 
 Unresolved deployment inputs: group identifier, available registry/TCP ports, five lab hostnames,
-and the exact assigned demo slot. These do not prevent local implementation. The next concrete
-implementation stage is starter repair and test setup after confirming the proposed test boundaries.
+and the exact assigned demo slot. These do not prevent local implementation. See `RUNNING.md`
+and `TESTING.md` for the completed RMI milestone. The next implementation milestone is TCP.
+
+## RMI implementation decisions resolved
+
+- `Common/Middleware` owns stable per-customer account monitors and reservation ledgers.
+  `RMI/RMIMiddleware` contains only backend lookup and service startup.
+- `IInventoryManager` extends the client interface with reserve/release operations; the
+  client-facing `IResourceManager` source is unchanged. `ReservationReceipt` carries quantity
+  and price. UUID booking IDs and cancellation tombstones support idempotent backend cleanup.
+- Duplicate flight numbers are aggregated into quantities before acquiring inventory.
+  Failed acquisition compensation retains unconfirmed releases; deletion can resume safely.
+- RMI host, prefix, registry port, and object port are configurable. The console retains its
+  host/name CLI and command dispatcher; optional registry/prefix properties support deployment.
+- Eight offline suites cover service behavior, real RMI boundaries, failures, concurrency,
+  and five separate JVMs. Bash launchers also have a separate-process acceptance mode.
+- All state is in memory. Physical five-host network validation remains to be performed on
+  the user's chosen lab machines; no TCP implementation or report/meeting work was added.

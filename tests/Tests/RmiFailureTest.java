@@ -15,8 +15,11 @@ public final class RmiFailureTest {
         ResourceManager backend = new ResourceManager("Flights");
         AtomicBoolean loseReserve = new AtomicBoolean(true);
         AtomicBoolean loseRelease = new AtomicBoolean(false);
+        AtomicBoolean rejectRelease = new AtomicBoolean(false);
         IInventoryManager endpoint = (IInventoryManager) Proxy.newProxyInstance(
                 IInventoryManager.class.getClassLoader(), new Class<?>[]{IInventoryManager.class}, (proxy, method, values) -> {
+                    if (method.getName().equals("releaseInventory") && rejectRelease.getAndSet(false))
+                        throw new RemoteException("Injected unavailable cancellation endpoint");
                     Object result;
                     try { result = method.invoke(backend, values); }
                     catch (InvocationTargetException error) { throw error.getCause(); }
@@ -40,6 +43,14 @@ public final class RmiFailureTest {
             expectRemoteFailure(() -> m.reserveFlight(7, 512));
             StarterTest.check(m.deleteCustomer(7) && m.queryFlight(512) == 1,
                     "resumed deletion cannot double-release after a lost cancellation reply");
+            m.newCustomer(7);
+            loseReserve.set(true);
+            rejectRelease.set(true);
+            expectRemoteFailure(() -> m.reserveFlight(7, 512));
+            StarterTest.check(m.queryFlight(512) == 0, "failed cleanup is reported while inventory remains held");
+            StarterTest.check(m.reserveFlight(7, 512) && m.queryCustomerInfo(7).contains("Total cost: $100"),
+                    "next booking first completes retained cancellation after endpoint recovery");
+            StarterTest.check(m.deleteCustomer(7) && m.queryFlight(512) == 1, "cleanup does not leak or double-return inventory");
         } finally { UnicastRemoteObject.unexportObject((Remote) endpoint, true); }
         System.out.println("PASS RmiFailureTest");
     }

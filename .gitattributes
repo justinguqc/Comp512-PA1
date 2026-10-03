@@ -1,0 +1,2 @@
+# Keep Unix deployment scripts readable by Bash after checkout on any platform.
+*.sh text eol=lf
