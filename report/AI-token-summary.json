@@ -1,0 +1,50 @@
+{
+  "scope": "Three exported implementation-session files; includes main coding thread and two guardian automatic-review threads. Excludes later report drafting and any unprovided sessions.",
+  "method": "Sum usage from token_usage_record, deduplicated by response_id. Do not sum cumulative counters. Cached input is included in input_tokens; reasoning output is included in output_tokens.",
+  "sessions": [
+    {
+      "file": "rollout-2026-10-03T02-48-29-01a10085-7812-7371-a934-3bc10017e29e.jsonl",
+      "unique_response_count": 107,
+      "latest_usage_timestamp": "2026-10-03T08:12:58.085Z",
+      "tokens": {
+        "input_tokens": 13903486,
+        "cached_input_tokens": 13620352,
+        "output_tokens": 83972,
+        "reasoning_output_tokens": 17282,
+        "total_tokens": 13987458
+      }
+    },
+    {
+      "file": "rollout-2026-10-03T02-53-27-01a1008a-024f-7810-96f5-6ec8f16b2924.jsonl",
+      "unique_response_count": 12,
+      "latest_usage_timestamp": "2026-10-03T08:01:56.681Z",
+      "tokens": {
+        "input_tokens": 700863,
+        "cached_input_tokens": 521216,
+        "output_tokens": 1313,
+        "reasoning_output_tokens": 529,
+        "total_tokens": 702176
+      }
+    },
+    {
+      "file": "rollout-2026-10-03T04-10-03-01a100d0-2529-7332-b2d2-fbf06ed3082d.jsonl",
+      "unique_response_count": 3,
+      "latest_usage_timestamp": "2026-10-03T08:12:46.600Z",
+      "tokens": {
+        "input_tokens": 73741,
+        "cached_input_tokens": 49408,
+        "output_tokens": 306,
+        "reasoning_output_tokens": 134,
+        "total_tokens": 74047
+      }
+    }
+  ],
+  "total": {
+    "input_tokens": 14678090,
+    "cached_input_tokens": 14190976,
+    "output_tokens": 85591,
+    "reasoning_output_tokens": 17945,
+    "total_tokens": 14763681
+  },
+  "uncached_input_tokens": 487114
+}

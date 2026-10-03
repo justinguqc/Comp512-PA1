@@ -1,0 +1,290 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[margin=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{array,booktabs,tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=black}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\newcommand{\pending}[1]{\textcolor{red!65!black}{\textbf{[To be confirmed: #1]}}}
+\newcommand{\code}[1]{\texttt{#1}}
+% Report draft: technical claims are grounded in commit 637aebb and the test records.
+% Replace every \pending field with verified team information before submission.
+% Exactly five planned pages; page 4 is dedicated to tests. AI logs are separate attachments.
+\begin{document}
+\begin{center}
+{\Large\bfseries COMP512 Programming Assignment 1}\[4pt]
+{\large Distributing a Travel Reservation Application}\[4pt]
+McGill University --- Fall 2026\\
+Group \pending{group number}\\
+\pending{member A name and student ID}; \pending{member B name and student ID}
+\end{center}
+
+\section{Architecture and RMI distribution}
+\subsection{Component boundaries}
+The system has five roles: a console client, middleware, and three resource managers
+for flights, cars, and rooms. Both implementations use this topology:
+\begin{center}
+\begin{tabular}{ccc}
+ & & Flights manager\\
+Console client $\longrightarrow$ & Middleware $\longrightarrow$ & Cars manager\\
+ & & Rooms manager
+\end{tabular}
+\end{center}
+Each manager owns its inventory, availability, prices, and backend booking records.
+Middleware routes inventory operations and owns customer accounts, reservation ledgers,
+billing, bundles, and customer deletion. Central customer ownership avoids customer
+replication and lets one service construct a bill spanning all three resource types.
+It also makes middleware a single point of failure; availability after crashes is outside
+the implemented scope.
+
+The client-facing \code{IResourceManager} contract retains all 21 original method
+signatures. An internal \code{IInventoryManager} extends it with
+\code{reserveInventory(key, quantity, bookingId)} and \code{releaseInventory(bookingId)}.
+A successful acquisition returns an immutable receipt containing the item key, quantity,
+and booked price. Middleware never creates customers at the inventory managers. The
+legacy customer methods remain available there for starter compatibility.
+
+\subsection{RMI communication and compatibility}
+The RMI client resolves middleware in a registry and invokes the existing interface.
+Middleware resolves three independent manager stubs and forwards each resource operation
+to its owner. Shared registry/export lifecycle code handles bindings and shutdown;
+hostnames, registry ports, binding prefixes, and exported object ports are configurable.
+The console dispatcher is reused. Small starter repairs remove an illegal source character,
+add a bill total, and accept the documented bundle flags. Optional registry/prefix properties
+support deployment without changing the client-facing contract.
+
+The final working tree shares its asynchronous business core between transports:
+\code{AsyncMiddleware} contains customer coordination, while the RMI \code{Middleware}
+facade supplies synchronous interface methods. RMI backend calls run through an executor
+adapter; TCP endpoints use asynchronous socket channels directly. Resource managers share
+the same transport-independent inventory implementation.
+
+\subsection{Selection of the RMI version}
+The partner-reviewed AI-assisted RMI solution is preserved as Git tag
+\code{rmi-complete} at commit \code{6c17981}. It is the accepted base for the subsequent
+TCP work. \pending{identify who developed each independent RMI version, confirm the
+submitted version, and give the actual comparison and reasons for selecting it}.
+The preliminary alternative must be submitted separately; it is not represented by
+this repository's starter baseline.
+
+\newpage
+\section{TCP message passing and general wrapping}
+\subsection{A reusable invocation service}
+Both client--middleware and middleware--manager links use persistent TCP sockets.
+\code{TcpChannel.invoke(Method, Object[])} is the general asynchronous invocation service.
+\code{Services.blocking(IResourceManager.class, channel)} creates a proxy exposing the
+entire client interface. The console calls ordinary methods on this proxy and waits for
+each result before issuing its next command. The proxy handles every operation, including
+both \code{newCustomer} overloads, without operation-specific message layouts.
+
+The same \code{Protocol.write} and \code{Protocol.read} services create and parse messages
+on both links. Method signatures are derived from the interface rather than supplied
+as arbitrary reflective targets. \code{Operations} validates the operation, argument
+count, and argument types; middleware accepts client methods, while inventory endpoints
+also accept the internal acquisition/release operations. The Java interface still declares
+\code{RemoteException} for compatibility, but TCP communication uses no RMI calls or Java
+object deserialization.
+
+\subsection{Framing and data representation}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\toprule
+Envelope & Fields in transmission order\\
+\midrule
+Common prefix & Four-byte payload length; protocol version; message kind; request ID\\
+Request payload & Operation signature; argument count; typed argument values\\
+Response payload & Nullable error string; typed result value\\
+\bottomrule
+\end{tabularx}
+\end{center}
+Integers, booleans, nulls, UTF-8 strings, string vectors, and reservation receipts have
+explicit type tags. Strings carry byte lengths, so locations and multiline bills do not
+require delimiter escaping. Length framing is necessary because TCP is a byte stream:
+one message may arrive in fragments, or several messages may arrive together. Reading
+the exact declared payload isolates each message in either case.
+
+The decoder rejects unsupported versions, invalid kinds/type tags, negative or excessive
+lengths, and trailing frame bytes. A frame is limited to 1 MiB, an argument list to
+32 entries, and a string vector to 10000 entries. These limits bound individual incoming
+messages. Unknown signatures produce error replies rather than arbitrary method execution.
+
+\subsection{Correlation, timeout, and failure semantics}
+Each channel assigns a monotonically increasing request ID and stores a future in a
+pending-request map. A dedicated writer serializes queued frames; a dedicated reader
+looks up response IDs and completes the corresponding futures. Responses can therefore
+arrive out of order without being delivered to the wrong caller. Completed requests
+cancel their timeout tasks.
+
+The default channel timeout is 30000 ms and is configurable. A timeout or disconnect
+closes that channel and fails its pending requests. There is no automatic reconnect or
+automatic mutation retry: if a connection fails after a server changed its state, the
+caller cannot infer whether the mutation occurred. Backend booking tokens support
+idempotent cleanup while the same backend remains alive, but do not guarantee end-to-end
+exactly-once client commands. A multi-resource operation can involve several reply waits;
+the channel timeout is not a deadline for the whole bundle.
+
+\newpage
+\section{Concurrency, customers, and bundles}
+\subsection{Progress without waiting for backend replies}
+\code{TcpServer} separates accepting connections, reading requests, and writing responses.
+For middleware, request dispatch returns a completion stage immediately. A completion
+callback enqueues the response when its backend work finishes; no middleware dispatcher
+calls \code{get()} or \code{join()} on a backend future. Dedicated socket threads can wait
+for bytes or queued output, but such waits do not occupy a shared request worker awaiting
+an inventory result. This is asynchronous coordination using blocking socket I/O, rather
+than a claim that all sockets use nonblocking NIO.
+
+Each customer has an ordered chain of futures. Reserving, querying the bill, and deleting
+that customer execute in sequence, preserving ledger consistency. The short account
+monitor protects queue updates and is not held while waiting for a network reply.
+Different customers and independent inventory queries can progress while one customer's
+reservation is delayed. Customer IDs are generated with collision checking against
+existing accounts.
+
+Inventory endpoints accept multiple connections and dispatch operations onto four
+execution workers with a bounded queue. Complete inventory transitions are synchronized
+inside \code{ResourceManager}; two callers cannot both obtain the last available seat.
+This briefly serializes state mutation at one manager, while connection handling and
+request execution remain concurrent. Inventory locks never wait for another server.
+
+There are 64 accepted connections per server, 1024 pending requests per channel/session
+or customer queue, and 256 queued inventory tasks. Overload is rejected or closes the
+affected connection. These bounds control outstanding work; they are not throughput
+measurements, and long-lived customer/token records can still accumulate in memory.
+
+\subsection{Reservation and deletion invariants}
+Every backend acquisition has a unique booking ID. Successful replay returns the same
+receipt, and repeated release does not restore inventory twice. Cancellation tombstones
+also prevent a delayed reserve from succeeding after its release arrived first. Middleware
+stores the booking token and receipt in the customer ledger only after successful
+coordination. Billing combines all resource types and uses a long total with deterministic
+item ordering. It preserves the starter's grouped latest-price convention: a later booking
+of an item can reprice that customer's existing grouped reservations of the same item.
+
+Deletion releases each confirmed booking and removes it from the ledger only after
+confirmation. If deletion is interrupted, confirmed releases are not repeated; the
+remaining work is retained. New bookings and bill queries are rejected during incomplete
+deletion, and a later deletion request can resume while the relevant endpoints are usable.
+
+\subsection{Bundle coordination and its limits}
+Middleware validates flight inputs, aggregates duplicate flight numbers into quantities,
+and adds the optional destination car and room. Acquisitions run in a future chain.
+The customer's ledger is updated only when all acquisitions succeed. If an item is
+unavailable, middleware cancels this attempt's tokens while preserving earlier reservations.
+Attempted tokens are recorded before sending acquisitions, allowing cleanup even if an
+error follows a backend mutation. Unconfirmed cancellations remain pending for later retry.
+
+This compensation strategy handles ordinary availability failures and retryable remote
+errors; it is not a crash-safe distributed transaction. Queries may observe intermediate
+acquisitions. All inventory, customers, booking records, and tombstones are in memory.
+A closed TCP backend channel requires operational recovery, and component restart does
+not restore prior state. Persistence, replication, and automatic reconnection are not
+implemented.
+
+\newpage
+\section{Tests and observed results}
+Testing uses public return values, bills, and availability rather than inspecting private
+maps. Fourteen offline suites passed on JDK 17.0.11 on October 3, 2026. Service tests use
+real managers; integration tests use real RMI registries or loopback TCP sockets. Controlled
+backend faults/delays test failure and concurrency behavior. The following scenarios cover
+updates and queries that could otherwise expose inconsistent state.
+
+{\small
+\renewcommand{\arraystretch}{1.16}
+\begin{tabularx}{\linewidth}{@{}p{0.24\linewidth}X@{}}
+\toprule
+Scenario / suites & Sequence and expected result verified\\
+\midrule
+Starter behavior\newline\code{StarterTest} & Add flight 512 with two seats at \$100; add one seat at price 0. Query gives three seats and price \$100. Reserve one seat, reject flight deletion, and obtain a \$100 bill. Documented bundle flags are accepted.\\
+Atomic inventory\newline\code{InventoryTest} & Twelve callers compete for one seat: exactly one succeeds. Replayed reserve returns the same booking; repeated release restores one seat only. Release before a delayed reserve prevents that reserve. Negative additions fail.\\
+Customer ownership\newline\code{MiddlewareTest} & Create a central customer; reserve all three types; query one combined bill. Backends have no corresponding customer. Delete the customer and verify all quantities restored; reject duplicate customer creation.\\
+Bundle behavior\newline\code{BundleTest},\newline\code{TcpMiddlewareTest} & From three \$100 flight seats and one \$30 car/\$80 room, reserve two copies of flight 512 plus car and room: bill \$310, one seat left. A later sold-out item causes compensation without removing previous bookings. Invalid/empty bundles fail.\\
+RMI serialization\newline\code{RmiIntegrationTest} & Use real registries/stubs on both links to verify receipt and vector serialization, remote bills, bundle calls, and deletion.\\
+Ambiguous mutations\newline\code{RmiFailureTest},\newline\code{TcpFailureTest} & Inject an error after reserve mutation and a failed cancellation. Retain incomplete cleanup, retry after the injected fault clears, and verify no leaked or double-restored inventory. Resume interrupted deletion. TCP also rejects unknown/internal client methods and completes pending calls on timeout/disconnect.\\
+RMI concurrency\newline\code{RmiConcurrencyTest} & Hold a Flights reply and complete an unrelated customer's operation. Twelve simultaneous same-customer bookings retain every entry; 100 concurrent generated customer IDs are distinct.\\
+General TCP service\newline\code{TcpProtocolTest},\newline\code{TcpTransportTest} & Round-trip every signature and both customer overloads, Unicode/multiline strings, receipts, fragmented/coalesced frames; reject oversized frames. Invoke CRUD and reserve/release through a real socket and general proxy.\\
+TCP concurrency\newline\code{TcpConcurrencyTest} & Hold 40 flight reservations. Cars queries on the same and another channel complete before the gate opens. Out-of-order replies reach the correct callers. Twelve same-customer bookings yield a \$120 bill and are fully released.\\
+Five-process console\newline\code{ProcessRmiTest},\newline\code{ProcessTcpTest} & Run three managers, middleware, and console in separate JVMs. Exercise CRUD/prices, individual reservations, bills, bundles, reserved-item deletion rejection, customer deletion, and restored inventory. Also run the actual Bash launchers.\\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Reproduction and scope.} Run \code{./tests/run-tests.ps1} or
+\code{bash tests/run-tests.sh}; both compile sources and stop on failure. Make builds,
+Bash syntax checks, TCP runner smoke tests, and TCP launcher acceptance also pass.
+\code{docs/TESTING.md} maps suites to behaviors; process logs are under \code{build/}.
+These are correctness/progress checks, not performance benchmarks. Five JVMs on loopback
+do not establish successful deployment on five distinct physical machines.
+\pending{additional manual tests or actual five-host results, if any}.
+
+\newpage
+\section{AI use and submission artifacts}
+AI assistance was used through the Codex coding agent for repository inspection,
+architecture discussion, implementation, tests, source annotations, and technical
+documentation. CodeGraph supported source navigation. The user approved central customer
+ownership, shared logic, and public test boundaries, then requested a blocking TCP client,
+asynchronous middleware, and a general client wrapping service. Generated implementations
+were validated by compilation, behavioral tests, fault injection, and process acceptance.
+The user also reported reviewing the RMI code with their partner and accepting it.
+
+Development was recorded in staged local commits: starter repairs, atomic inventory,
+RMI middleware, bundle compensation, RMI deployment, TCP wrapping, asynchronous TCP
+coordination, and TCP deployment. The report describes implementation commit
+\code{637aebb}. The accepted RMI snapshot is preserved as \code{rmi-complete}; preserving
+it does not replace submission of the other student's independent preliminary version.
+
+\textbf{Token estimate.} The three available implementation-session exports record
+14,763,681 total tokens (approximately 14.76 million): 14,678,090 input and 85,591 output.
+Input includes 14,190,976 cached tokens; uncached input is 487,114. Reasoning tokens are
+already included in output and are not added again. The estimate sums per-response
+\code{usage} records, deduplicated by response ID, rather than cumulative counters.
+It covers the main coding thread and two automatic-review threads through October 3,
+2026, 08:12:58 UTC. Repeated context processing explains the large cached-input count;
+this is not a count of unique words written. Later report drafting and unprovided sessions
+are excluded. \pending{confirm whether any additional AI sessions need to be included}.
+
+\textbf{Attachments.} \code{report/AI-conversations.json} preserves all exported records
+from the three \code{sessions/*.jsonl} files in a single JSON document;
+\code{report/AI-token-summary.json} gives the usage breakdown. The handout requires complete
+JSON exports for editor-integrated assistants and PDFs for any general/web chats.
+The instructor's \code{AI-logging-examples/} files are not this team's interaction evidence.
+Changelogs and commits do not replace the conversation exports. Logs are separate
+attachments to retain the required report length. \pending{confirm export completeness
+and attach any additional conversations, including a later report-drafting export if required}.
+
+\textbf{Submission checklist.} Confirm group/member identities; replace all marked
+unknowns; attach the real AI logs and token estimate; include the completed code and
+preliminary alternative RMI version. The supplied handout sets the report deadline to
+October 5 and code submission by the demo. The live demo requires at least five distinct
+machines and all group members present. Lab hostnames and the actual assigned demo slot
+must be confirmed independently.
+
+\section{Individual contributions and collaboration}
+% This must remain the final report section, as required by the handout.
+\pending{confirm real contributions for both members; provide specific work and extent,
+using percentages or another clear description rather than assumed equal shares}.
+
+{\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}XX@{}}
+\toprule
+Task & Member A: \pending{name} & Member B: \pending{name}\\
+\midrule
+RMI distribution & \pending{AI/non-AI role, independent implementation, review/revision, share} & \pending{AI/non-AI role, independent implementation, review/revision, share}\\
+TCP sockets & \pending{protocol/transport/concurrency work, tests/revisions, share} & \pending{protocol/transport/concurrency work, tests/revisions, share}\\
+Customer/bundle functionality & \pending{design, implementation, validation, share} & \pending{design, implementation, validation, share}\\
+Report & \pending{sections drafted, evidence checking, editing, share} & \pending{sections drafted, evidence checking, editing, share}\\
+\bottomrule
+\end{tabularx}}
+
+\textbf{Collaboration record.} \pending{initial source-understanding meeting date and
+duration; independent RMI work dates/durations; version-comparison meeting and decision;
+TCP collaboration or developer/tester arrangement; later meeting durations and/or
+discussion-message counts}. Explain how both members contributed significantly using
+the actual work performed. The existing user statement confirms partner review of the
+RMI solution, but does not establish meeting dates, independent effort, or contribution
+percentages.
+\end{document}

@@ -1,5 +1,20 @@
 # Implementation changelog
 
+## Report draft (2026-10-03)
+
+- At the user's subsequent request, re-read all assignment handouts, especially the report
+  requirements on page 4; report work is now explicitly within scope.
+- Added a standalone English LaTeX draft with five planned pages, a dedicated test page,
+  technical implementation content, AI usage, and contributions/collaboration as the final section.
+- Converted three existing session JSONL exports into a JSON attachment and calculated
+  14,763,681 processed tokens from deduplicated per-response usage, including cached input.
+  Original exports are unchanged; later report drafting is outside that snapshot.
+- Marked unknown identities, contribution/meeting information, RMI comparison reasons, and
+  extra session/deployment evidence for user confirmation rather than fabricating them.
+- Opened the source in the built-in LaTeX editor. Both compilation attempts failed with
+  `Unable to find standard directories for platform`; PDF output and actual page count
+  remain unverified. No application code was changed.
+
 ## Stage 7 - TCP deployment and console acceptance (2026-10-03)
 
 - Added standalone TCP inventory/middleware entry points and a blocking TCP console client.
