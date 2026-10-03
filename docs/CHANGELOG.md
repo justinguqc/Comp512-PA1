@@ -1,5 +1,15 @@
 # Implementation changelog
 
+## Report style revision (2026-10-03)
+
+- Shortened the English report into four planned pages and changed the prose to a direct,
+  first-person student tone at the user's request.
+- Removed repetitive submission advice and excessive implementation parameters while
+  keeping both transports, TCP messaging/concurrency, customer/bundle choices, one test
+  page, AI usage, and the final contributions/collaboration section.
+- Source checks pass; the built-in compiler still reports the same environment error,
+  so PDF layout and actual page count remain unverified.
+
 ## Report evidence confirmation (2026-10-03)
 
 - Confirmed that the AI logs are complete and belong to one Codex conversation; clarified

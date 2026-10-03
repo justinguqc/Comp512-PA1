@@ -1,6 +1,6 @@
 # Report draft and submission evidence
 
-`PA1-report.tex` is a standalone English draft, organized into five planned pages.
+`PA1-report.tex` is a standalone English draft, organized into four planned pages.
 The actual page count has not been verified: the Codex built-in compiler returned
 `Unable to find standard directories for platform` on both attempts. The editable
 source was opened in the built-in LaTeX editor. No PDF compilation success is claimed.
@@ -9,14 +9,14 @@ Requirements were rechecked against `COMP512-p1-2026.pdf`, especially page 4:
 
 | Required content | Draft location |
 | --- | --- |
-| 3–5 pages describing architecture/design of both transports | Planned pages 1–3 |
-| TCP message passing and concurrency, with most technical detail on TCP | Sections 2–3 |
-| Customer and bundle choices | Sections 1 and 3 |
+| 3–5 pages describing architecture/design of both transports | Planned pages 1–2 |
+| TCP message passing and concurrency, with most technical detail on TCP | Section 2 |
+| Customer and bundle choices | Section 1 |
 | RMI version selection and reasons | Section 1.3; error-handling rationale supplied by Zuojun |
-| One page listing tests and troublesome update/query sequences | Planned page 4, Section 4 |
-| Estimated total AI tokens | Section 5, based on exported implementation sessions |
+| One page listing tests and troublesome update/query sequences | Planned page 3, Section 3 |
+| Estimated total AI tokens | Section 4, based on exported implementation sessions |
 | All code-generation conversations as attachments | `AI-conversations.json`, plus any missing exports |
-| Detailed individual contributions and collaboration as the final section | Section 6; roles and two meetings filled, remaining details marked |
+| Detailed individual contributions and collaboration as the final section | Section 5; roles and two meetings filled, remaining details marked |
 
 The deadline stated in the supplied handout is October 5. Code is due by the demo.
 Five distinct machines and both members' attendance are demo requirements; five JVMs
@@ -66,3 +66,9 @@ Further confirmation: Yinkun's preliminary RMI version was developed without AI.
 meetings lasted approximately 30 minutes and use Montreal local time. Yinkun's local
 process tests all passed; five-machine experiments have not been performed. Both members
 jointly wrote the report.
+
+Style revision: shortened the report and used straightforward first-person plural English.
+The four planned pages cover RMI/design, TCP, tests, and AI use plus collaboration.
+Detailed queue sizes, repetitive submission advice, and duplicated explanations were removed.
+Required design choices, concrete test cases, AI disclosure, and confirmed contributions remain.
+The revised source was sent to the built-in compiler; the same environment error persists.
