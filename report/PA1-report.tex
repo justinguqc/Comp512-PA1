@@ -18,8 +18,8 @@
 {\Large\bfseries COMP512 Programming Assignment 1}\[4pt]
 {\large Distributing a Travel Reservation Application}\[4pt]
 McGill University --- Fall 2026\\
-Group \pending{group number}\\
-\pending{member A name and student ID}; \pending{member B name and student ID}
+Group 30\\
+Zuojun Gu; Yinkun Zhou
 \end{center}
 
 \section{Architecture and RMI distribution}
@@ -63,12 +63,17 @@ adapter; TCP endpoints use asynchronous socket channels directly. Resource manag
 the same transport-independent inventory implementation.
 
 \subsection{Selection of the RMI version}
-The partner-reviewed AI-assisted RMI solution is preserved as Git tag
-\code{rmi-complete} at commit \code{6c17981}. It is the accepted base for the subsequent
-TCP work. \pending{identify who developed each independent RMI version, confirm the
-submitted version, and give the actual comparison and reasons for selecting it}.
-The preliminary alternative must be submitted separately; it is not represented by
-this repository's starter baseline.
+Zuojun Gu developed the AI-assisted RMI version. After comparing the two independent
+versions, the team selected this version because its more thorough error and exception
+handling reduced the risk of potential bugs. In particular, the accepted implementation
+retains unconfirmed cleanup and supports resuming interrupted deletion instead of
+silently treating uncertain backend operations as successful. Yinkun Zhou developed the other preliminary RMI version independently without AI and
+was responsible for running real tests and final code verification.
+
+The partner-reviewed solution is preserved as Git tag \code{rmi-complete} at commit
+\code{6c17981} and serves as the accepted base for subsequent TCP work. The final code
+is submitted together with the alternative preliminary RMI version. The latter must
+be included separately and is not represented by this repository's starter baseline.
 
 \newpage
 \section{TCP message passing and general wrapping}
@@ -218,17 +223,20 @@ Bash syntax checks, TCP runner smoke tests, and TCP launcher acceptance also pas
 \code{docs/TESTING.md} maps suites to behaviors; process logs are under \code{build/}.
 These are correctness/progress checks, not performance benchmarks. Five JVMs on loopback
 do not establish successful deployment on five distinct physical machines.
-\pending{additional manual tests or actual five-host results, if any}.
+Yinkun verified that all local process tests passed. Experiments on five distinct
+machines have not yet been conducted.
 
 \newpage
 \section{AI use and submission artifacts}
-AI assistance was used through the Codex coding agent for repository inspection,
-architecture discussion, implementation, tests, source annotations, and technical
-documentation. CodeGraph supported source navigation. The user approved central customer
-ownership, shared logic, and public test boundaries, then requested a blocking TCP client,
-asynchronous middleware, and a general client wrapping service. Generated implementations
-were validated by compilation, behavioral tests, fault injection, and process acceptance.
-The user also reported reviewing the RMI code with their partner and accepting it.
+Zuojun Gu worked with the Codex coding agent on repository inspection, architecture,
+implementation, automated tests, source annotations, technical documentation, and report
+drafting. CodeGraph supported source navigation. The design retained central customer
+ownership and shared business logic, with a blocking TCP client, asynchronous middleware,
+and a general client wrapping service. Generated code was checked through compilation,
+behavioral tests, fault injection, and process acceptance. Yinkun Zhou was responsible
+for running real tests and final code verification. Both members co-authored the report.
+The two members compared the RMI
+versions before selecting the AI-assisted implementation.
 
 Development was recorded in staged local commits: starter repairs, atomic inventory,
 RMI middleware, bundle compensation, RMI deployment, TCP wrapping, asynchronous TCP
@@ -255,7 +263,7 @@ Changelogs and commits do not replace the conversation exports. Logs are separat
 attachments to retain the required report length. \pending{confirm export completeness
 and attach any additional conversations, including a later report-drafting export if required}.
 
-\textbf{Submission checklist.} Confirm group/member identities; replace all marked
+\textbf{Submission checklist.} Replace all marked
 unknowns; attach the real AI logs and token estimate; include the completed code and
 preliminary alternative RMI version. The supplied handout sets the report deadline to
 October 5 and code submission by the demo. The live demo requires at least five distinct
@@ -264,27 +272,33 @@ must be confirmed independently.
 
 \section{Individual contributions and collaboration}
 % This must remain the final report section, as required by the handout.
-\pending{confirm real contributions for both members; provide specific work and extent,
-using percentages or another clear description rather than assumed equal shares}.
+The team divided the subsequent work into AI-assisted development and independent
+execution/verification. Zuojun Gu wrote the implementation and technical documentation with AI
+assistance. Yinkun Zhou ran real tests and performed the final code verification.
+Both members jointly wrote the report.
+The following table describes responsibilities rather than assigning unverified
+percentage shares.
 
 {\small
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\linewidth}{@{}p{0.20\linewidth}XX@{}}
 \toprule
-Task & Member A: \pending{name} & Member B: \pending{name}\\
+Task & Zuojun Gu & Yinkun Zhou\\
 \midrule
-RMI distribution & \pending{AI/non-AI role, independent implementation, review/revision, share} & \pending{AI/non-AI role, independent implementation, review/revision, share}\\
-TCP sockets & \pending{protocol/transport/concurrency work, tests/revisions, share} & \pending{protocol/transport/concurrency work, tests/revisions, share}\\
-Customer/bundle functionality & \pending{design, implementation, validation, share} & \pending{design, implementation, validation, share}\\
-Report & \pending{sections drafted, evidence checking, editing, share} & \pending{sections drafted, evidence checking, editing, share}\\
+RMI distribution & Developed the AI-assisted independent version and discussed version selection. & Developed the independent non-AI version, compared both versions, ran tests, and verified final code.\\
+TCP sockets & Developed protocol, general wrapping, transport, asynchronous coordination, and automated tests with AI assistance. & Ran real tests and performed final code verification.\\
+Customer/bundle functionality & Developed customer ownership, billing, bundle compensation, and deletion with AI assistance. & Verified the implementation through testing and code checks.\\
+Report & Co-authored the English report, using AI assistance for drafting architecture, tests, and AI usage. & Co-authored the report and contributed implementation/test verification evidence.\\
 \bottomrule
 \end{tabularx}}
 
-\textbf{Collaboration record.} \pending{initial source-understanding meeting date and
-duration; independent RMI work dates/durations; version-comparison meeting and decision;
-TCP collaboration or developer/tester arrangement; later meeting durations and/or
-discussion-message counts}. Explain how both members contributed significantly using
-the actual work performed. The existing user statement confirms partner review of the
-RMI solution, but does not establish meeting dates, independent effort, or contribution
-percentages.
+\textbf{Collaboration record.} On October 2, 2026, at 21:45, both members met to read
+the assignment documents together and clarify the division of work. This meeting lasted
+approximately 30 minutes. A second meeting
+on October 3, 2026, at approximately 03:00 compared the two RMI versions and established
+the decision to adopt the AI-assisted version because of its more detailed error and
+exception handling; it also lasted approximately 30 minutes. Both times are Montreal
+local time. The subsequent developer/tester arrangement paired Zuojun's
+AI-assisted implementation with Yinkun's real test execution and final code checks.
+All local process tests passed; the five-machine experiment remains to be conducted.
 \end{document}

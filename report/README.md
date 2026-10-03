@@ -12,11 +12,11 @@ Requirements were rechecked against `COMP512-p1-2026.pdf`, especially page 4:
 | 3–5 pages describing architecture/design of both transports | Planned pages 1–3 |
 | TCP message passing and concurrency, with most technical detail on TCP | Sections 2–3 |
 | Customer and bundle choices | Sections 1 and 3 |
-| RMI version selection and reasons | Section 1.3; real comparison still needed |
+| RMI version selection and reasons | Section 1.3; error-handling rationale supplied by Zuojun |
 | One page listing tests and troublesome update/query sequences | Planned page 4, Section 4 |
 | Estimated total AI tokens | Section 5, based on exported implementation sessions |
 | All code-generation conversations as attachments | `AI-conversations.json`, plus any missing exports |
-| Detailed individual contributions and collaboration as the final section | Section 6; team details still needed |
+| Detailed individual contributions and collaboration as the final section | Section 6; roles and two meetings filled, remaining details marked |
 
 The deadline stated in the supplied handout is October 5. Code is due by the demo.
 Five distinct machines and both members' attendance are demo requirements; five JVMs
@@ -42,14 +42,22 @@ unprovided sessions. These are processed tokens, not unique text or cost estimat
 
 Replace every `\pending{...}` with confirmed information before submitting:
 
-- Group number, both members' names and student IDs.
-- Who independently used AI / avoided AI for RMI; dates/durations; preliminary alternative file.
-- Actual RMI comparison, choice, and reasons.
-- Contributions and extent for RMI, TCP, customer/bundle functionality, and report.
-- Source-understanding/comparison meetings and later collaboration dates/durations or message counts.
+- Identify the alternative preliminary RMI submission file.
 - Completeness of AI exports and whether there were additional AI sessions.
-- Any additional manual or five-host tests; otherwise keep the physical deployment limitation.
+- Refresh deployment evidence only if five-host testing is later performed; currently it has not been attempted.
 
 After filling the unknowns, compile and confirm 3–5 pages, with the tests fitting on one
 page and collaboration remaining the final section. Attach AI logs separately from the
 report body. Refresh the usage estimate if more exported sessions are included.
+
+Team information confirmed by Zuojun: Group 30, Zuojun Gu and Yinkun Zhou. Student IDs
+are intentionally omitted at the user's request. Zuojun developed the AI-assisted version
+and subsequent implementation with AI; Yinkun ran real tests and performed final code
+verification. The AI version was selected for more detailed exception/error handling.
+The first meeting (October 2, 21:45) covered document reading and division of work;
+the second (October 3, approximately 03:00) compared RMI versions and selected the AI version.
+
+Further confirmation: Yinkun's preliminary RMI version was developed without AI. Both
+meetings lasted approximately 30 minutes and use Montreal local time. Yinkun's local
+process tests all passed; five-machine experiments have not been performed. Both members
+jointly wrote the report.

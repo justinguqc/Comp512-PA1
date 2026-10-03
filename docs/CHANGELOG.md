@@ -1,5 +1,18 @@
 # Implementation changelog
 
+## Report team details (2026-10-03)
+
+- Filled Group 30 and member names Zuojun Gu and Yinkun Zhou; omitted student IDs as requested.
+- Recorded Zuojun's AI-assisted implementation role and Yinkun's real testing/final code
+  verification responsibilities without inventing contribution percentages.
+- Added the supplied RMI selection rationale: more thorough error/exception handling.
+- Recorded October 2 at 21:45 document-reading/work-allocation meeting and October 3 around
+  03:00 RMI-comparison/selection meeting, each approximately 30 minutes in Montreal local time.
+- Confirmed Yinkun's independent RMI version used no AI; all local process tests passed,
+  five-machine testing has not been performed, and both members co-authored the report.
+- English LaTeX source remains editable. Compilation still fails with the same built-in
+  compiler environment error; actual PDF layout/page count is not verified.
+
 ## Report draft (2026-10-03)
 
 - At the user's subsequent request, re-read all assignment handouts, especially the report
