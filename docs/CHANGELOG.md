@@ -1,5 +1,16 @@
 # Implementation changelog
 
+## Stage 5 - General TCP wrapping (2026-10-03)
+
+- Saved the partner-reviewed RMI solution as annotated tag `rmi-complete` at `6c17981`.
+- Added a general typed request/response codec with protocol version, length framing,
+  request IDs, operation signatures, arguments, result/error, and explicit size bounds.
+- Added an interface-derived operation allowlist, including both customer-creation overloads.
+  TCP uses binary data streams, not RMI or Java object deserialization.
+- TDD: protocol test failed before the codec existed, then passed. Verified every interface
+  signature, Unicode/multiline values, receipts, split/joined frames, and oversized-frame rejection.
+- Async transport and shared asynchronous customer coordination follow in Stage 6.
+
 ## RMI deployment and acceptance (2026-10-03)
 
 - Replaced the middleware launch placeholder and updated inventory/client launchers to manage
