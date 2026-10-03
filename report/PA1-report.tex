@@ -79,22 +79,18 @@ Response & Length, version, kind, request ID, error or typed result\\
 \bottomrule
 \end{tabularx}
 \end{center}
-Strings use UTF-8 and a length field, so multiline bills and location names do not need
-special separators. TCP can split one message across reads or combine several messages
-in one read; the length prefix lets us recover each complete message. We also reject
-invalid methods, types, and lengths, with a 1 MiB frame limit. TCP uses our binary
-codec rather than RMI or Java object serialization.
+Length-prefixed UTF-8 strings support multiline bills and location names. Frame lengths
+handle split or combined TCP reads. We reject invalid methods, types, and lengths,
+with a 1 MiB limit. Both links use our binary codec, without RMI or Java serialization.
 
 \subsection{Keeping middleware responsive}
 Each connection has a reader and writer. The channel assigns each request an ID and
 keeps a future for its reply. When a response arrives, its ID tells us which future
 to complete, even if replies arrive out of order.
 
-Middleware sends a backend request and continues reading client requests. It uses
-future callbacks to continue the operation and queue the reply when the backend
-finishes. It does not wait on a backend future with \code{get()} or \code{join()}.
-The socket threads can block on I/O, but a slow backend does not block middleware
-from accepting or handling unrelated work.
+Middleware forwards requests and uses future callbacks to queue replies, without
+waiting on backend futures. Socket threads can block on I/O, but unrelated requests
+continue while a backend is slow.
 
 Requests for the same customer form an ordered future chain. This avoids losing
 reservations when two calls update one customer's bill. Other customers and inventory
@@ -103,17 +99,13 @@ four workers with a bounded queue. Inventory updates are synchronized so two req
 cannot both take the last seat. Queues and pending requests are bounded to limit overload.
 
 \subsection{Errors and limitations}
-A channel timeout defaults to 30 seconds. Timeout or disconnect closes the channel
-and fails waiting calls. We do not automatically resend a failed mutation: it may
-already have happened before the reply was lost. Repeated backend cleanup uses booking
-IDs, and failed cancellations remain recorded for retry. Closed TCP channels do not
-automatically reconnect.
+A timeout (30 seconds by default) or disconnect closes the channel and fails waiting
+calls. There is no automatic reconnect or resend: a mutation may already have happened.
+Booking IDs prevent duplicate cleanup, and failed cancellations remain recorded for retry.
 
-The system keeps everything in memory. Restarting a server loses its state, and
-middleware is a single point of failure. Bundle cleanup is compensation, not a
-crash-safe transaction; inventory queries may see temporary reservations while a
-bundle is being processed. We focused on correct local behavior and concurrency,
-without adding persistence or replication.
+State is in memory and lost on restart; middleware is a single point of failure.
+Bundle cleanup is not crash-safe, and queries may see temporary reservations.
+Persistence and replication are outside our implementation.
 
 \newpage
 \section{What we tested}
