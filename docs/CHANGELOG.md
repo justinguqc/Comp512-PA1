@@ -1,5 +1,22 @@
 # Implementation changelog
 
+## Stage 7 - TCP deployment and console acceptance (2026-10-03)
+
+- Added standalone TCP inventory/middleware entry points and a blocking TCP console client.
+  All client operations use the general service proxy and shared protocol wrapper.
+- Added configurable TCP host/port/timeout launchers, shutdown cleanup, and Make/test runner
+  support for both transports. The process main thread waits for shutdown; middleware
+  dispatch remains asynchronous while inventory replies are outstanding.
+- TDD: the five-process acceptance failed with missing TCP entry points before implementation;
+  it passes after the standalone roles and client adapter were added.
+- Verified all 14 suites on JDK 17.0.11, server/client Make build, Bash syntax and TCP runner
+  smoke tests, plus the five-JVM TCP console scenario through the actual Bash launchers.
+- Documented local/native Windows/five-host commands, general client service usage, queue/frame
+  bounds, timeout/disconnect behavior, and in-memory recovery limitations. Updated the plan.
+- Local RMI/TCP implementation is complete. The accepted RMI snapshot remains tagged
+  `rmi-complete`; actual five-host lab connectivity still requires the user's chosen machines.
+  Report and meeting work are excluded.
+
 ## Stage 6 - Asynchronous TCP services and shared coordination (2026-10-03)
 
 - Added multiplexed TCP channels with pending request IDs, separate readers/writers, bounded

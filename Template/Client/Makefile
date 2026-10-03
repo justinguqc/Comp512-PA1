@@ -4,7 +4,8 @@ all: compile-client
 	make -C ../Server/ RMIInterface.jar
 
 compile-client: ../Server/RMIInterface.jar
-	javac -encoding UTF-8 -cp ../Server/RMIInterface.jar Client/*.java
+	make -C ../Server/ compile-server-rmi
+	javac -encoding UTF-8 -cp ../Server Client/*.java
 
 clean:
 	rm -f Client/*.class
