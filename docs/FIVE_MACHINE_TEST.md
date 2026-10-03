@@ -31,4 +31,17 @@ ready; the client connected and displayed Help.
 
 The user ended TCP testing after these scenarios. No five-host timeout/disconnect,
 large-scale contention, or performance result is claimed. RMI tests previously passed
-locally, but RMI five-machine testing is still pending. No raw remote logs were supplied.
+locally. No raw remote logs were supplied.
+
+## Subsequent five-machine RMI confirmation
+
+The accepted standalone RMI snapshot (`rmi-complete`, commit `6c17981`) was extracted
+into the shared `~/Comp512-PA1-RMI` directory and compiled targeting Java 17.
+The same five role/host assignments were used. Registries used ports 3101–3104,
+exported objects 4101–4104, and binding prefix `group_30_`.
+
+The user confirmed all three managers and middleware ready, client connection and Help,
+then the flight-512/car/room bundle scenario: bill $310 with one seat, car, and room
+remaining. The user ended RMI testing there. Customer deletion and failed-bundle
+compensation were not performed in this five-machine RMI run. Copyable commands for
+both transports are saved in `docs/DEMO_COMMANDS.md`.

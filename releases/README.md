@@ -40,5 +40,6 @@ RMI_PORT=3104 RMI_PREFIX=group_30_ bash Template/Client/run_client.sh tr-open-01
 
 The hosts manage their registries; no separate `rmiregistry` command is required.
 Registry ports 3101–3104 and object ports 4101–4104 must be reachable. RMI five-host
-testing has not yet been performed. This is the accepted AI-assisted RMI version,
+startup, Help, bundle billing and availability queries were subsequently confirmed by
+the user; see `docs/FIVE_MACHINE_TEST.md` in the main checkout. This is the accepted AI-assisted RMI version,
 not Yinkun's independent non-AI preliminary version.

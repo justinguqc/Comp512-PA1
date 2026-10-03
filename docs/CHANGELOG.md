@@ -1,5 +1,15 @@
 # Implementation changelog
 
+## Demo command sheet and five-host RMI confirmation (2026-10-03)
+
+- Saved TCP and standalone RMI startup commands for the five actual McGill hosts in
+  `docs/DEMO_COMMANDS.md`, with shared-directory compilation, console scenarios,
+  controlled TCP concurrency demonstration, and shutdown order.
+- Recorded user-confirmed standalone RMI five-host startup, Help, bundle bill $310,
+  and remaining inventory. RMI five-host testing ended after that scenario; deletion
+  and failure compensation remain available for subsequent demonstration.
+- No application code, saved RMI archive, or existing report PDF was changed.
+
 ## Five-host TCP confirmation and RMI snapshot export (2026-10-03)
 
 - Recorded user-confirmed TCP testing on five named McGill hosts: startup, bundles/bills,
